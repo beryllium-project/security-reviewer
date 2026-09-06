@@ -1,0 +1,66 @@
+{
+  "$schema": "../../contracts/review-manifest.schema.json",
+  "schema_version": "1.0.0",
+  "spdx_license_identifier": "GPL-3.0-only",
+  "copyright": "Copyright (C) 2026 James Morris <jamorris@linux.microsoft.com>",
+  "package": {
+    "id": "SR-20000101-002-fixture-executed",
+    "model_id": "fixture-model",
+    "run_id": "fixture-run-001"
+  },
+  "source": {
+    "component": "helium-te-poc",
+    "locator": "component://helium-te-poc",
+    "commit": "2222222222222222222222222222222222222222",
+    "branch": "refs/heads/helium-te-travel-fedora44",
+    "detached": false,
+    "dirty": false,
+    "dirty_detail": null
+  },
+  "execution": {
+    "classification": "execution-backed",
+    "static_only_reason": null,
+    "commands_attempted": [
+      {
+        "id": "approval-001",
+        "approval_id": "APPROVAL-001",
+        "command": "printf 'fixture\\n'",
+        "working_directory": "component://helium-te-poc",
+        "tool_id": "printf",
+        "exit_result": {
+          "kind": "exited",
+          "code": 0
+        }
+      }
+    ],
+    "tool_versions": [
+      {
+        "id": "printf",
+        "version": "coreutils-fixture"
+      }
+    ],
+    "retained_evidence": [
+      {
+        "path": "evidence/APPROVAL-001/exit-result.json",
+        "sha256": "9aa6cc39228d76a1462468bc8a428715f011887e4a24215cce10c14f6e282098",
+        "command_id": "approval-001"
+      },
+      {
+        "path": "evidence/APPROVAL-001/run-record.json",
+        "sha256": "7caa4c07daa4340f18c9ac99837bb62e2c338f9778902a9512ad3218a34e84b7",
+        "command_id": "approval-001"
+      },
+      {
+        "path": "evidence/APPROVAL-001/stderr.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "command_id": "approval-001"
+      },
+      {
+        "path": "evidence/APPROVAL-001/stdout.log",
+        "sha256": "e80b71cd14d3cbd65f4173abcbfcf01a545dbca32a72d575108b553a648cc96f",
+        "command_id": "approval-001"
+      }
+    ]
+  },
+  "qualifications": []
+}

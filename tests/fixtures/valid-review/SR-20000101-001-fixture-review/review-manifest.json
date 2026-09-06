@@ -1,0 +1,28 @@
+{
+  "$schema": "../../contracts/review-manifest.schema.json",
+  "schema_version": "1.0.0",
+  "spdx_license_identifier": "GPL-3.0-only",
+  "copyright": "Copyright (C) 2026 James Morris <jamorris@linux.microsoft.com>",
+  "package": {
+    "id": "SR-20000101-001-fixture-review",
+    "model_id": "fixture-model",
+    "run_id": "fixture-run-001"
+  },
+  "source": {
+    "component": "helium-te-poc",
+    "locator": "component://helium-te-poc",
+    "commit": "1111111111111111111111111111111111111111",
+    "branch": "refs/heads/helium-te-travel-fedora44",
+    "detached": false,
+    "dirty": false,
+    "dirty_detail": null
+  },
+  "execution": {
+    "classification": "static-only",
+    "static_only_reason": "Synthetic fixture; no target command was approved or run.",
+    "commands_attempted": [],
+    "tool_versions": [],
+    "retained_evidence": []
+  },
+  "qualifications": []
+}

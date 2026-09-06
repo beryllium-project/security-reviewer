@@ -1,0 +1,462 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:beryllium:security-review-manifest:1.0.0",
+  "title": "Beryllium security-review package manifest",
+  "description": "Machine-readable provenance for a security-reviewer package (reviews/SR-YYYYMMDD-NNN-<short-name>/) that reviews one registered Beryllium component snapshot. This attestation contract does not prove trusted execution, does not apply to the retained Helium agent-review packages, and grants no human gate. Derived from urn:helium:review-manifest:1.0.0.",
+  "x-spdx-license-identifier": "GPL-3.0-only",
+  "x-copyright": "Copyright (C) 2026 James Morris <jamorris@linux.microsoft.com>",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "schema_version",
+    "spdx_license_identifier",
+    "copyright",
+    "package",
+    "source",
+    "execution",
+    "qualifications"
+  ],
+  "properties": {
+    "$schema": {
+      "const": "../../contracts/review-manifest.schema.json"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "spdx_license_identifier": {
+      "const": "GPL-3.0-only"
+    },
+    "copyright": {
+      "const": "Copyright (C) 2026 James Morris <jamorris@linux.microsoft.com>"
+    },
+    "package": {
+      "$ref": "#/$defs/package"
+    },
+    "source": {
+      "$ref": "#/$defs/source"
+    },
+    "execution": {
+      "$ref": "#/$defs/execution"
+    },
+    "qualifications": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/qualification"
+      },
+      "uniqueItems": true
+    }
+  },
+  "$defs": {
+    "safe_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]{0,127}$"
+    },
+    "declared_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+    },
+    "package_id": {
+      "type": "string",
+      "pattern": "^SR-[0-9]{8}-[0-9]{3}-[a-z0-9][a-z0-9-]{0,40}$"
+    },
+    "approval_id": {
+      "type": "string",
+      "pattern": "^APPROVAL-[0-9]{3}$"
+    },
+    "component_locator": {
+      "type": "string",
+      "pattern": "^component://[a-z0-9][a-z0-9._-]{0,127}$"
+    },
+    "working_directory": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1024,
+      "pattern": "^component://[a-z0-9][a-z0-9._-]{0,127}(/[A-Za-z0-9][A-Za-z0-9._/-]*)?$"
+    },
+    "package": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "model_id",
+        "run_id"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/package_id"
+        },
+        "model_id": {
+          "$ref": "#/$defs/declared_id"
+        },
+        "run_id": {
+          "$ref": "#/$defs/declared_id"
+        }
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "component",
+        "locator",
+        "commit",
+        "branch",
+        "detached",
+        "dirty",
+        "dirty_detail"
+      ],
+      "properties": {
+        "component": {
+          "$ref": "#/$defs/safe_id"
+        },
+        "locator": {
+          "$ref": "#/$defs/component_locator"
+        },
+        "commit": {
+          "type": "string",
+          "pattern": "^(?!0{40}$)[0-9a-f]{40}$"
+        },
+        "branch": {
+          "oneOf": [
+            {
+              "type": "string",
+              "minLength": 12,
+              "maxLength": 512,
+              "pattern": "^refs/heads/"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "detached": {
+          "type": "boolean"
+        },
+        "dirty": {
+          "type": "boolean"
+        },
+        "dirty_detail": {
+          "oneOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "detached": {
+                "const": true
+              }
+            },
+            "required": [
+              "detached"
+            ]
+          },
+          "then": {
+            "properties": {
+              "branch": {
+                "type": "null"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "branch": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "dirty": {
+                "const": true
+              }
+            },
+            "required": [
+              "dirty"
+            ]
+          },
+          "then": {
+            "properties": {
+              "dirty_detail": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "dirty_detail": {
+                "type": "null"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "tool_version": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "version"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/safe_id"
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        }
+      }
+    },
+    "exit_result": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "code"
+          ],
+          "properties": {
+            "kind": {
+              "const": "exited"
+            },
+            "code": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 255
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "signal"
+          ],
+          "properties": {
+            "kind": {
+              "const": "signaled"
+            },
+            "signal": {
+              "type": "string",
+              "pattern": "^SIG[A-Z0-9]+$"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "reason"
+          ],
+          "properties": {
+            "kind": {
+              "const": "not-started"
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            }
+          }
+        }
+      ]
+    },
+    "command_attempt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "approval_id",
+        "command",
+        "working_directory",
+        "tool_id",
+        "exit_result"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/safe_id"
+        },
+        "approval_id": {
+          "$ref": "#/$defs/approval_id"
+        },
+        "command": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 16384
+        },
+        "working_directory": {
+          "$ref": "#/$defs/working_directory"
+        },
+        "tool_id": {
+          "$ref": "#/$defs/safe_id"
+        },
+        "exit_result": {
+          "$ref": "#/$defs/exit_result"
+        }
+      }
+    },
+    "retained_evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "sha256",
+        "command_id"
+      ],
+      "properties": {
+        "path": {
+          "type": "string",
+          "pattern": "^evidence/[A-Za-z0-9][A-Za-z0-9._/-]*$",
+          "maxLength": 1024
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^(?!0{64}$)[0-9a-f]{64}$"
+        },
+        "command_id": {
+          "$ref": "#/$defs/safe_id"
+        }
+      }
+    },
+    "execution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "classification",
+        "static_only_reason",
+        "commands_attempted",
+        "tool_versions",
+        "retained_evidence"
+      ],
+      "properties": {
+        "classification": {
+          "enum": [
+            "static-only",
+            "execution-backed"
+          ]
+        },
+        "static_only_reason": {
+          "oneOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "commands_attempted": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/command_attempt"
+          },
+          "uniqueItems": true
+        },
+        "tool_versions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/tool_version"
+          },
+          "uniqueItems": true
+        },
+        "retained_evidence": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/retained_evidence"
+          },
+          "uniqueItems": true
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "classification": {
+                "const": "static-only"
+              }
+            },
+            "required": [
+              "classification"
+            ]
+          },
+          "then": {
+            "properties": {
+              "static_only_reason": {
+                "type": "string",
+                "minLength": 1
+              },
+              "commands_attempted": {
+                "maxItems": 0
+              },
+              "tool_versions": {
+                "maxItems": 0
+              },
+              "retained_evidence": {
+                "maxItems": 0
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "static_only_reason": {
+                "type": "null"
+              },
+              "commands_attempted": {
+                "minItems": 1
+              },
+              "tool_versions": {
+                "minItems": 1
+              },
+              "retained_evidence": {
+                "minItems": 1
+              }
+            }
+          }
+        }
+      ]
+    },
+    "qualification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "field",
+        "reason"
+      ],
+      "properties": {
+        "field": {
+          "type": "string",
+          "pattern": "^/(package|source|execution)(/.*)?$",
+          "maxLength": 1024
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        }
+      }
+    }
+  }
+}

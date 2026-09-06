@@ -1,0 +1,10 @@
+{
+  "approval_id": "APPROVAL-001",
+  "command": "printf 'fixture\\n'",
+  "working_directory": "component://helium-te-poc",
+  "observed_commit": "2222222222222222222222222222222222222222",
+  "observed_dirty": false,
+  "started_utc": "2000-01-01T00:00:00Z",
+  "finished_utc": "2000-01-01T00:00:01Z",
+  "post_run_dirty_paths": []
+}

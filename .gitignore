@@ -1,0 +1,8 @@
+# Inbound material is never tracked; keep only the README.
+/inbox/*
+!/inbox/README.md
+# Scratch space for in-progress evidence handling; keep only the README.
+/scratch/*
+!/scratch/README.md
+/build/
+/.test-output/

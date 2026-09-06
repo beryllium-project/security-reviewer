@@ -1,0 +1,21 @@
+<!-- SPDX-License-Identifier: GPL-3.0-only -->
+<!-- Copyright (C) 2026 James Morris <jamorris@linux.microsoft.com> -->
+
+# Evidence ledger
+
+Package ID: `@@PACKAGE_ID@@`
+Title: @@TITLE@@
+Created: @@CREATED@@
+Status: `Draft`
+Distribution: `private`
+
+Evidence IDs (`@@PACKAGE_ID@@-E####`) are append-only and unique within the
+package. A correction adds a new row and names the corrected row in its
+statement; rows are never rewritten or renumbered. Kind is one of
+`Local file`, `Command output`, `Public source`, `User statement`, or
+`Specialist return`. Fact label is `Established`, `Inferred`, `Proposed`, or
+`Unknown`.
+
+| Evidence ID | Source | Locator | Revision | Kind | Statement | Fact label | Recorded |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| None | Not recorded | Not recorded | Not recorded | Not recorded | No evidence has been admitted. | Not recorded | Not recorded |

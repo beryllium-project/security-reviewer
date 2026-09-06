@@ -1,0 +1,28 @@
+{
+  "$schema": "../../contracts/review-manifest.schema.json",
+  "schema_version": "1.0.0",
+  "spdx_license_identifier": "GPL-3.0-only",
+  "copyright": "Copyright (C) 2026 James Morris <jamorris@linux.microsoft.com>",
+  "package": {
+    "id": "REPLACE_WITH_SR_PACKAGE_ID",
+    "model_id": "REPLACE_WITH_EXACT_DECLARED_MODEL_ID",
+    "run_id": "REPLACE_WITH_EXACT_DECLARED_RUN_ID"
+  },
+  "source": {
+    "component": "REPLACE_WITH_REGISTERED_COMPONENT",
+    "locator": "component://REPLACE_WITH_REGISTERED_COMPONENT",
+    "commit": "REPLACE_WITH_FULL_40_HEX_COMMIT",
+    "branch": "refs/heads/REPLACE_WITH_EXACT_BRANCH",
+    "detached": false,
+    "dirty": false,
+    "dirty_detail": null
+  },
+  "execution": {
+    "classification": "static-only",
+    "static_only_reason": "REPLACE_WITH_REASON_NO_REVIEW_COMMANDS_RAN",
+    "commands_attempted": [],
+    "tool_versions": [],
+    "retained_evidence": []
+  },
+  "qualifications": []
+}
