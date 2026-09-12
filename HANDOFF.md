@@ -3,7 +3,7 @@
 
 # Security-reviewer handoff
 
-**Last updated:** 2026-09-06
+**Last updated:** 2026-09-12
 
 ## Overall position
 
@@ -13,10 +13,13 @@ Helium proof-of-concept review contract at commit
 `helium-te-travel-fedora44`); see `AUTHORS.md` for the per-file derivation
 record. Helium was read only and not changed.
 
-The repository is an independent Git repository on `main`. It has no remote,
-has not been pushed, and has not been backed up. Nothing has been published.
-No engagement has been run: `reviews/` and `syntheses/` are empty and
-`SECURITY-REVIEWS.md` records an empty package set.
+The repository is an independent Git repository on `main` at `9ca5071`.
+Project Manager registration is complete. The owner created the private
+`origin` and pushed `main` on 2026-09-06 (`PMR-021`); the Project Manager
+observed local `main` synchronized with `origin/main` again on 2026-09-12.
+This is a private backup, not publication. No engagement has been run:
+`reviews/` and `syntheses/` are empty and `SECURITY-REVIEWS.md` records an
+empty package set.
 
 ## What exists
 
@@ -60,19 +63,12 @@ from the suite and `PASS (93 checks)` from the linter tests on this tree;
 that is an agent observation, not a human validation, and the responsible
 human should re-run the suite before relying on it.
 
-## Blockers and open items
+## Open items
 
-- **Project Manager registration pending.** The component is not yet
-  recorded in `workspace://COMPONENTS.md`, the parent `.gitignore`, the
-  Project Manager roster, or the Project Manager's component cards and
-  inspection script. Registration is a Project Manager-owned write.
 - **Sibling target registration is owner-side.** Registering
   `security-reviewer` as a target in sibling `readonly-inspect.sh` lists is
-  a change to those owners' repositories; it is requested through the
-  Project Manager, not made here.
-- **Backup and remote are human actions.** Creating a remote, pushing, and
-  backing up remain explicit responsible-human steps; the agent never
-  performs them.
+  a change to those owners' repositories; it remains requested as `PMR-022`
+  through the Project Manager, not made here.
 - **No first engagement.** The workflow has been exercised only against
   synthetic fixtures by the maintained suite, not against a real target.
 
@@ -108,3 +104,10 @@ helium-te-poc`, decline any session execution set (static-only), and verify
 that the agent presents discovery candidates before it offers the
 `Independent review | Synthesis | Edit scope | Cancel` gate. Do not begin a
 substantive package unless that engagement is intended.
+
+## Coordination update
+
+The Project Manager carried only the registration, backup, and source-pointer
+wording above under `PMR-030`, `PMR-031`, and class 3 of
+`PMD-20260904-003`. It did not run an engagement, modify review content, grant
+a gate, or push this component.

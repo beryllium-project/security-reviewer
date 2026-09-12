@@ -39,9 +39,12 @@ requests are `workspace://project-manager/queue/LEDGER.md` and
 `workspace://project-manager/outbox/component-requests.md`. Coordination
 requests from this component to the Project Manager are recorded only in this
 repository's `outbox/pm-queue.md` as `SRQ-NNN` rows; the Project Manager
-pulls them. The parent `workspace://HANDOFF.md` and
-`workspace://formal-verification/helium-te-fv-pathfinder.md` are redirect
-stubs kept for older citations; prefer the `project-manager/` paths.
+pulls them. The parent `workspace://HANDOFF.md` remains a compatibility
+redirect. The former `workspace://formal-verification/` redirects were
+retired by
+`workspace://project-manager/records/decisions/PMD-20260912-001-retire-formal-verification-redirects.md`;
+current assurance lookup uses
+`workspace://project-manager/records/assurance/` directly.
 
 Use this tier to establish:
 
