@@ -3,7 +3,7 @@
 
 # Security-reviewer handoff
 
-**Last updated:** 2026-09-12
+**Last updated:** 2026-09-15
 
 ## Overall position
 
@@ -16,9 +16,10 @@ record. Helium was read only and not changed.
 The repository is an independent Git repository on `main`. Before the
 2026-09-12 Project Manager carry, local `main` at `9ca5071` was synchronized
 with `origin/main`; the owner created that private remote and pushed it on
-2026-09-06 (`PMR-021`). Current `main` is the carried coordination commit
-`c13c36e`, one commit ahead of `origin/main` pending owner review and push.
-This is a private backup state, not publication. No engagement has been run:
+2026-09-06 (`PMR-021`). Carry `c13c36e` then left `main` one commit ahead.
+Current `main` is the later Project Manager coordination carry `3a40583`, two commits ahead of
+`origin/main` pending owner review and push. This is a private backup state,
+not publication. No engagement has been run:
 `reviews/` and `syntheses/` are empty and `SECURITY-REVIEWS.md` records an
 empty package set.
 
@@ -108,7 +109,8 @@ substantive package unless that engagement is intended.
 
 ## Coordination update
 
-The Project Manager carried only the registration, backup, and source-pointer
-wording above under `PMR-030`, `PMR-031`, and class 3 of
-`PMD-20260904-003`. It did not run an engagement, modify review content, grant
-a gate, or push this component.
+The Project Manager carried only registration, backup, source-pointer, and
+current-state coordination wording under `PMR-030`, `PMR-031`, `PMR-033`,
+and class 3 of `PMD-20260904-003`. The latest carry is `3a40583`; `PMR-056`
+refreshes this handoff after that commit. The Project Manager did not run an
+engagement, modify review content, grant a gate, or push this component.
