@@ -13,11 +13,12 @@ Helium proof-of-concept review contract at commit
 `helium-te-travel-fedora44`); see `AUTHORS.md` for the per-file derivation
 record. Helium was read only and not changed.
 
-The repository is an independent Git repository on `main` at `9ca5071`.
-Project Manager registration is complete. The owner created the private
-`origin` and pushed `main` on 2026-09-06 (`PMR-021`); the Project Manager
-observed local `main` synchronized with `origin/main` again on 2026-09-12.
-This is a private backup, not publication. No engagement has been run:
+The repository is an independent Git repository on `main`. Before the
+2026-09-12 Project Manager carry, local `main` at `9ca5071` was synchronized
+with `origin/main`; the owner created that private remote and pushed it on
+2026-09-06 (`PMR-021`). Current `main` is the carried coordination commit
+`c13c36e`, one commit ahead of `origin/main` pending owner review and push.
+This is a private backup state, not publication. No engagement has been run:
 `reviews/` and `syntheses/` are empty and `SECURITY-REVIEWS.md` records an
 empty package set.
 
