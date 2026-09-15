@@ -16,10 +16,10 @@ record. Helium was read only and not changed.
 The repository is an independent Git repository on `main`. Before the
 2026-09-12 Project Manager carry, local `main` at `9ca5071` was synchronized
 with `origin/main`; the owner created that private remote and pushed it on
-2026-09-06 (`PMR-021`). Carry `c13c36e` then left `main` one commit ahead.
-Current `main` is the later Project Manager coordination carry `3a40583`, two commits ahead of
-`origin/main` pending owner review and push. This is a private backup state,
-not publication. No engagement has been run:
+2026-09-06 (`PMR-021`). Carry `c13c36e` then left `main` one commit ahead,
+carry `3a40583` left it two ahead, and `PMR-056` refresh `12fd9fb` left it
+three ahead of `origin/main`, pending owner review and push. This is a private
+backup state, not publication. No engagement has been run:
 `reviews/` and `syntheses/` are empty and `SECURITY-REVIEWS.md` records an
 empty package set.
 
@@ -67,10 +67,9 @@ human should re-run the suite before relying on it.
 
 ## Open items
 
-- **Sibling target registration is owner-side.** Registering
-  `security-reviewer` as a target in sibling `readonly-inspect.sh` lists is
-  a change to those owners' repositories; it remains requested as `PMR-022`
-  through the Project Manager, not made here.
+- **Remaining sibling target registration is owner-side.** Threat-modeler
+  registered `security-reviewer` at owner commit `c4126b6`; the
+  analysis-workbook registration remains requested as `PMR-050`.
 - **No first engagement.** The workflow has been exercised only against
   synthetic fixtures by the maintained suite, not against a real target.
 
@@ -111,6 +110,6 @@ substantive package unless that engagement is intended.
 
 The Project Manager carried only registration, backup, source-pointer, and
 current-state coordination wording under `PMR-030`, `PMR-031`, `PMR-033`,
-and class 3 of `PMD-20260904-003`. The latest carry is `3a40583`; `PMR-056`
-refreshes this handoff after that commit. The Project Manager did not run an
-engagement, modify review content, grant a gate, or push this component.
+`PMR-056`, `PMR-060`, and class 3 of `PMD-20260904-003`. The Project Manager
+did not run an engagement, modify review content, grant a gate, or push this
+component.
