@@ -239,8 +239,7 @@ orchestrator=$repository_root/.github/agents/security-reviewer.agent.md
 require_pattern "$orchestrator" '^name: security-reviewer$'
 require_pattern "$orchestrator" '^user-invocable: true$'
 require_pattern "$orchestrator" '^disable-model-invocation: true$'
-require_pattern "$orchestrator" '^model: claude-opus-5$'
-refute_pattern "$orchestrator" '^model: claude-fable-5.1$'
+require_pattern "$orchestrator" '^model: gpt-5.3-codex$'
 require_text "$orchestrator" 'reasoning effort `max`'
 require_text "$orchestrator" 'context tier `long_context`'
 for tool in read search execute edit agent web ask_user; do
@@ -257,8 +256,7 @@ for specialist in security-evidence security-research security-finding-review; d
     agent=$repository_root/.github/agents/$specialist.agent.md
     require_pattern "$agent" "^name: $specialist\$"
     require_pattern "$agent" '^user-invocable: false$'
-    require_pattern "$agent" '^model: claude-opus-5$'
-    refute_pattern "$agent" '^model: claude-fable-5.1$'
+    require_pattern "$agent" '^model: gpt-5.3-codex$'
     require_text "$agent" 'reasoning effort `max`'
     require_text "$agent" 'context tier `long_context`'
     require_text "$agent" 'later selection of `claude-fable-5.1`'
@@ -284,6 +282,7 @@ for document in "$orchestrator" "$instructions" "$skill" \
     "$repository_root/README.md" "$repository_root/AGENT-INTERFACE.md" \
     "$repository_root/HANDOFF.md"; do
     require_text "$document" "$pm_tasking_command"
+    require_text "$document" 'gpt-5.3-codex'
 done
 for document in "$orchestrator" "$instructions" "$skill" \
     "$repository_root/README.md" "$repository_root/AGENT-INTERFACE.md"; do

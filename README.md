@@ -27,7 +27,7 @@ local-first evidence order, runs only commands the user approved by exact
 text, obtains an independent write-disabled finding review, validates the
 package against its manifest, and records a restartable handoff.
 
-The orchestrator and all three specialists use `claude-opus-5` by default,
+The orchestrator and all three specialists use `gpt-5.3-codex` by default,
 with reasoning effort `max` and context tier `long_context`. A responsible
 human may explicitly override a later invocation, including selecting
 `claude-fable-5.1`; historical package names and model provenance remain

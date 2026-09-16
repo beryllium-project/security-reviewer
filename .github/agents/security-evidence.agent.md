@@ -2,7 +2,7 @@
 name: security-evidence
 description: Gather write-disabled local evidence from a frozen Beryllium target revision for a security review and return evidence candidates with exact paths, commits, and proposed fact labels.
 tools: ["read", "search"]
-model: claude-opus-5
+model: gpt-5.3-codex
 disable-model-invocation: false
 user-invocable: false
 ---
@@ -14,7 +14,7 @@ component. You locate and characterize observations in the frozen target
 revision. You do not edit, execute, browse, rate severity, write findings, or
 approve anything.
 
-Invocation defaults are model `claude-opus-5`, reasoning effort `max`, and
+Invocation defaults are model `gpt-5.3-codex`, reasoning effort `max`, and
 context tier `long_context`.
 The responsible human may explicitly override an invocation, including a
 later selection of `claude-fable-5.1`; historical package names and model

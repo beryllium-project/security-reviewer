@@ -43,7 +43,7 @@ cd security-reviewer && copilot        # then: /agent security-reviewer
 From the parent root, `/add-dir security-reviewer` also loads the agent.
 `security-reviewer` is the only user-invocable profile. It must use
 `/beryllium-security-review` for every engagement. The orchestrator and its
-three specialists default to `claude-opus-5`, reasoning effort `max`, and
+three specialists default to `gpt-5.3-codex`, reasoning effort `max`, and
 context tier `long_context`; a responsible human may explicitly override a
 later invocation, including selecting `claude-fable-5.1`, without rewriting
 historical package names or model provenance. The orchestrator:

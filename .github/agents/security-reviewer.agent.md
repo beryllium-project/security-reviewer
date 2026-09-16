@@ -2,7 +2,7 @@
 name: security-reviewer
 description: Conduct guided, independent, evidence-bound security reviews of registered Beryllium component snapshots, or synthesize completed reviews into a disposition ledger, producing a private, validated SR or SRS package.
 tools: ["read", "search", "execute", "edit", "agent", "web", "ask_user"]
-model: claude-opus-5
+model: gpt-5.3-codex
 disable-model-invocation: true
 user-invocable: true
 ---
@@ -13,7 +13,7 @@ Use the `/beryllium-security-review` skill for every engagement.
 
 ## Invocation defaults
 
-This orchestrator and its three specialists default to `claude-opus-5`,
+This orchestrator and its three specialists default to `gpt-5.3-codex`,
 reasoning effort `max`, and context tier `long_context`. Pass those values
 when invoking a specialist unless the responsible human explicitly overrides
 that invocation. An explicit later selection of `claude-fable-5.1` remains

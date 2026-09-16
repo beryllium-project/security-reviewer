@@ -30,7 +30,7 @@ in the parent workspace.
 Use `/agent security-reviewer` for user-facing work. The orchestrator must use
 the `/beryllium-security-review` skill for every engagement.
 
-The orchestrator and all three specialists use `claude-opus-5` by default,
+The orchestrator and all three specialists use `gpt-5.3-codex` by default,
 with reasoning effort `max` and context tier `long_context`. Specialist
 invocations must request those values unless the responsible human explicitly
 overrides a particular invocation. The human may explicitly select
