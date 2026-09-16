@@ -27,11 +27,18 @@ local-first evidence order, runs only commands the user approved by exact
 text, obtains an independent write-disabled finding review, validates the
 package against its manifest, and records a restartable handoff.
 
+The orchestrator and all three specialists use `claude-opus-5` by default,
+with reasoning effort `max` and context tier `long_context`. A responsible
+human may explicitly override a later invocation, including selecting
+`claude-fable-5.1`; historical package names and model provenance remain
+unchanged.
+
 ## Status
 
 New component. No engagement has been run; `reviews/` and `syntheses/` are
 empty and `SECURITY-REVIEWS.md` records an empty package set. The repository
-has no remote and has not been pushed or backed up. See `HANDOFF.md`.
+has a private `origin`; its exact push and backup state is recorded in
+`HANDOFF.md`.
 
 ## Safety boundary
 
@@ -48,6 +55,19 @@ output is retained under the package `evidence/` directory and hashed into
 `review-manifest.json`. The agent uses only the maintained helper allowlist
 defined in `.github/copilot-instructions.md`. Public research is performed
 through the web tool using generic public-safe terms.
+
+The sole sibling-command exception is startup discovery for the phrase
+`check Project Manager tasking` and obvious variants:
+
+```sh
+bash "${PWD%/*}/project-manager/scripts/project-tasking.sh" resolve .
+```
+
+The validated output is discovery over
+`project-manager/outbox/component-requests.md`, not authorization. This is
+outside any review or synthesis package, is not target execution, needs no
+`APPROVAL-NNN`, and never falls back to session history, a task/todo database,
+background agents, prior chat, or memory.
 
 An independent review never reads, cites, summarizes, or reconciles another
 review package for the same target. Only synthesis mode reads multiple
@@ -106,6 +126,9 @@ Start an engagement:
 ```sh
 cd security-reviewer && copilot        # then: /agent security-reviewer
 ```
+
+Inside the agent, `check Project Manager tasking` runs the exact fail-closed
+startup resolver documented above.
 
 Repository checks:
 

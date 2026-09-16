@@ -42,7 +42,11 @@ cd security-reviewer && copilot        # then: /agent security-reviewer
 
 From the parent root, `/add-dir security-reviewer` also loads the agent.
 `security-reviewer` is the only user-invocable profile. It must use
-`/beryllium-security-review` for every engagement. It:
+`/beryllium-security-review` for every engagement. The orchestrator and its
+three specialists default to `claude-opus-5`, reasoning effort `max`, and
+context tier `long_context`; a responsible human may explicitly override a
+later invocation, including selecting `claude-fable-5.1`, without rewriting
+historical package names or model provenance. The orchestrator:
 
 - conducts guided intake, including the session execution set;
 - resolves registered target state through maintained helpers;
@@ -56,6 +60,22 @@ From the parent root, `/add-dir security-reviewer` also loads the agent.
 - invokes maintained lint, validation, and indexing helpers;
 - returns blocking questions and human-gate requirements to the user, ending
   with a `Human review target` section.
+
+When the user says `check Project Manager tasking`, or an obvious case,
+singular, or plural variant, the orchestrator runs exactly:
+
+```sh
+bash "${PWD%/*}/project-manager/scripts/project-tasking.sh" resolve .
+```
+
+This one read-only sibling command is startup discovery outside any review or
+synthesis package. It is not target execution, needs no `APPROVAL-NNN`, and
+does not use `scripts/run-approved-command.sh`. Its validated rows are
+discovery over `project-manager/outbox/component-requests.md`, not
+authorization. If resolution fails, the orchestrator stops and requests
+relaunch from the registered logical workspace entry; it never falls back to
+session history, a task/todo database, background agents, prior chat, or
+memory.
 
 ## Validation
 
@@ -149,7 +169,8 @@ The component writes only inside its own repository. Packages are never
 written into a target. A finding that implies a change elsewhere is recorded,
 not applied.
 
-The orchestrator execute allowlist is exactly:
+Apart from the exact Project Manager startup resolver in `## Invocation`, the
+orchestrator execute allowlist is exactly:
 
 - `scripts/readonly-inspect.sh`;
 - `scripts/discover-security-material.sh`;
@@ -167,8 +188,8 @@ commands run only when the user approves them in the session by exact command
 text, each recorded as an `APPROVAL-NNN` record and executed only through
 `scripts/run-approved-command.sh`, which refuses unrecorded commands and
 revision mismatches and retains hashed evidence. There is no direct Git,
-arbitrary shell, package manager, interpreter, or network-client escape
-hatch. Public network research uses only the web tool.
+arbitrary shell, other sibling command, package manager, interpreter, or
+network-client escape hatch. Public network research uses only the web tool.
 
 ## Independence rule
 

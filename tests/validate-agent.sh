@@ -239,7 +239,10 @@ orchestrator=$repository_root/.github/agents/security-reviewer.agent.md
 require_pattern "$orchestrator" '^name: security-reviewer$'
 require_pattern "$orchestrator" '^user-invocable: true$'
 require_pattern "$orchestrator" '^disable-model-invocation: true$'
-require_pattern "$orchestrator" '^model: claude-fable-5.1$'
+require_pattern "$orchestrator" '^model: claude-opus-5$'
+refute_pattern "$orchestrator" '^model: claude-fable-5.1$'
+require_text "$orchestrator" 'reasoning effort `max`'
+require_text "$orchestrator" 'context tier `long_context`'
 for tool in read search execute edit agent web ask_user; do
     require_pattern "$orchestrator" "\"$tool\""
 done
@@ -254,7 +257,11 @@ for specialist in security-evidence security-research security-finding-review; d
     agent=$repository_root/.github/agents/$specialist.agent.md
     require_pattern "$agent" "^name: $specialist\$"
     require_pattern "$agent" '^user-invocable: false$'
-    require_pattern "$agent" '^model: claude-fable-5.1$'
+    require_pattern "$agent" '^model: claude-opus-5$'
+    refute_pattern "$agent" '^model: claude-fable-5.1$'
+    require_text "$agent" 'reasoning effort `max`'
+    require_text "$agent" 'context tier `long_context`'
+    require_text "$agent" 'later selection of `claude-fable-5.1`'
     refute_pattern "$agent" '"edit"'
     refute_pattern "$agent" '"execute"'
     refute_pattern "$agent" '"agent"'
@@ -272,6 +279,26 @@ refute_pattern "$repository_root/.github/agents/security-finding-review.agent.md
 instructions=$repository_root/.github/copilot-instructions.md
 skill=$repository_root/.github/skills/beryllium-security-review/SKILL.md
 require_pattern "$skill" '^name: beryllium-security-review$'
+pm_tasking_command='bash "${PWD%/*}/project-manager/scripts/project-tasking.sh" resolve .'
+for document in "$orchestrator" "$instructions" "$skill" \
+    "$repository_root/README.md" "$repository_root/AGENT-INTERFACE.md" \
+    "$repository_root/HANDOFF.md"; do
+    require_text "$document" "$pm_tasking_command"
+done
+for document in "$orchestrator" "$instructions" "$skill" \
+    "$repository_root/README.md" "$repository_root/AGENT-INTERFACE.md"; do
+    require_text "$document" 'not target execution'
+    require_text "$document" 'session history'
+    require_text "$document" 'task/todo database'
+    require_text "$document" 'background agents'
+    require_text "$document" 'prior chat'
+    require_text "$document" 'memory'
+done
+for document in "$orchestrator" "$instructions" "$skill"; do
+    require_text "$document" 'discovery over'
+    require_text "$document" 'project-manager/outbox/component-requests.md'
+    require_text "$document" 'not as authorization'
+done
 for phrase in 'read-only' 'SR-YYYYMMDD-NNN' 'private' 'NOT RUN' \
     'not formally verified' 'risk acceptance' 'restricted-microsoft'; do
     require_text "$instructions" "$phrase"

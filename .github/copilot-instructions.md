@@ -30,6 +30,13 @@ in the parent workspace.
 Use `/agent security-reviewer` for user-facing work. The orchestrator must use
 the `/beryllium-security-review` skill for every engagement.
 
+The orchestrator and all three specialists use `claude-opus-5` by default,
+with reasoning effort `max` and context tier `long_context`. Specialist
+invocations must request those values unless the responsible human explicitly
+overrides a particular invocation. The human may explicitly select
+`claude-fable-5.1` later; historical package names and model provenance remain
+unchanged.
+
 The specialist agents are write-disabled:
 
 - `security-evidence` gathers local evidence from the frozen target revision
@@ -43,9 +50,33 @@ Specialist returns are inputs, not conclusions. The orchestrator owns scope
 control, stable identifier allocation, severity, findings, synthesis,
 artifacts, and user interaction.
 
+## Project Manager startup discovery
+
+When the user says `check Project Manager tasking`, or an obvious case,
+singular, or plural variant, run exactly:
+
+```sh
+bash "${PWD%/*}/project-manager/scripts/project-tasking.sh" resolve .
+```
+
+This is the sole permitted sibling command. Run it only from the registered
+logical workspace entry and treat its validated output as discovery over
+`project-manager/outbox/component-requests.md`, not as authorization. It is
+startup discovery outside any review or synthesis package and is not target execution.
+It needs no `APPROVAL-NNN` and does not use
+`scripts/run-approved-command.sh`.
+
+If the resolver path is absent or validation fails, stop and tell the human
+to relaunch from the registered logical workspace entry or repair Project
+Manager tasking. Never search session history, a task/todo database,
+background agents, prior chat, or memory as a fallback, and never infer a PMR
+from those sources. Present every returned row; if more than one is open, ask
+the human which request to perform before beginning owner work.
+
 ## Execution boundary
 
-The orchestrator may use `execute` only for:
+Apart from the exact Project Manager startup resolver above, the orchestrator
+may use `execute` only for:
 
 - `scripts/readonly-inspect.sh`;
 - `scripts/discover-security-material.sh`;
@@ -60,10 +91,10 @@ The orchestrator may use `execute` only for:
 
 Node is reached only through `scripts/lint-review-manifest.sh`. Do not use
 arbitrary shell, direct Git, network clients, package managers, interpreters,
-target scripts, sibling scripts, or any other executable. Use the web tool only
-for public research. If a maintained helper is absent or fails, record the
-limitation and stop the affected phase rather than substituting another
-command.
+target scripts, any other sibling script, or any other executable. Use the web
+tool only for public research. If a maintained helper is absent or fails,
+record the limitation and stop the affected phase rather than substituting
+another command.
 
 Target execution is prohibited by default. The only exception is a command the
 user approves in the current session by its exact command text. Each approved
