@@ -30,12 +30,21 @@ in the parent workspace.
 Use `/agent security-reviewer` for user-facing work. The orchestrator must use
 the `/beryllium-security-review` skill for every engagement.
 
-The orchestrator and all three specialists use `gpt-5.3-codex` by default,
-with reasoning effort `max` and context tier `long_context`. Specialist
-invocations must request those values unless the responsible human explicitly
-overrides a particular invocation. The human may explicitly select
-`claude-fable-5.1` later; historical package names and model provenance remain
-unchanged.
+Every run of these four profiles with `gpt-5.3-codex`, including a direct
+`security-reviewer` session and each specialist invocation, requires reasoning
+effort `xhigh` and context tier `default` exactly. The Codex effort and context
+values are not overridable. If a required Codex model, effort, or context value
+is unavailable, stop rather than silently falling back.
+
+For an explicit non-Codex selection, the project-wide reasoning default is
+`max` and the minimum is `high`; the responsible human may choose only `high`,
+`xhigh`, or `max` for that named invocation. `unset`, `medium`, `low`, and
+`minimal` are prohibited. A non-Codex selection imposes no context tier by
+itself. The selected model, effort, and any explicitly selected context tier
+are exact; if any selected value is unavailable, stop rather than silently
+substituting another model, effort, or context. An explicit later selection of
+`claude-fable-5.1` remains allowed; historical package names and model
+provenance remain unchanged.
 
 The specialist agents are write-disabled:
 

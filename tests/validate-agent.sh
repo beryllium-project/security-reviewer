@@ -63,6 +63,24 @@ require_text() {
     fi
 }
 
+require_flat_text() {
+    if [[ -f $1 ]] && tr '\n' ' ' <"$1" | grep -Fq -- "$2"; then
+        pass "${1#"$repository_root/"} states across line wraps: $2"
+    else
+        fail "${1#"$repository_root/"} does not state across line wraps: $2"
+    fi
+}
+
+require_count_at_least() {
+    local file=$1 needle=$2 minimum=$3 count
+    count=$(grep -Fc -- "$needle" "$file" 2>/dev/null || true)
+    if [[ -f $file ]] && ((count >= minimum)); then
+        pass "${file#"$repository_root/"} states $needle at least $minimum times"
+    else
+        fail "${file#"$repository_root/"} states $needle only $count times; expected at least $minimum"
+    fi
+}
+
 require_pattern() {
     if [[ -f $1 ]] && grep -Eq -- "$2" "$1"; then
         pass "${1#"$repository_root/"} matches: $2"
@@ -240,8 +258,9 @@ require_pattern "$orchestrator" '^name: security-reviewer$'
 require_pattern "$orchestrator" '^user-invocable: true$'
 require_pattern "$orchestrator" '^disable-model-invocation: true$'
 require_pattern "$orchestrator" '^model: gpt-5.3-codex$'
-require_text "$orchestrator" 'reasoning effort `max`'
-require_text "$orchestrator" 'context tier `long_context`'
+require_text "$orchestrator" 'reasoning effort `xhigh`'
+require_text "$orchestrator" 'context tier `default`'
+require_text "$orchestrator" 'direct `security-reviewer` session'
 for tool in read search execute edit agent web ask_user; do
     require_pattern "$orchestrator" "\"$tool\""
 done
@@ -257,9 +276,9 @@ for specialist in security-evidence security-research security-finding-review; d
     require_pattern "$agent" "^name: $specialist\$"
     require_pattern "$agent" '^user-invocable: false$'
     require_pattern "$agent" '^model: gpt-5.3-codex$'
-    require_text "$agent" 'reasoning effort `max`'
-    require_text "$agent" 'context tier `long_context`'
-    require_text "$agent" 'later selection of `claude-fable-5.1`'
+    require_text "$agent" 'reasoning effort `xhigh`'
+    require_text "$agent" 'context tier `default`'
+    require_flat_text "$agent" 'later selection of `claude-fable-5.1`'
     refute_pattern "$agent" '"edit"'
     refute_pattern "$agent" '"execute"'
     refute_pattern "$agent" '"agent"'
@@ -277,6 +296,33 @@ refute_pattern "$repository_root/.github/agents/security-finding-review.agent.md
 instructions=$repository_root/.github/copilot-instructions.md
 skill=$repository_root/.github/skills/beryllium-security-review/SKILL.md
 require_pattern "$skill" '^name: beryllium-security-review$'
+policy_documents=(
+    "$orchestrator"
+    "$instructions"
+    "$skill"
+    "$repository_root/README.md"
+    "$repository_root/AGENT-INTERFACE.md"
+    "$repository_root/.github/agents/security-evidence.agent.md"
+    "$repository_root/.github/agents/security-research.agent.md"
+    "$repository_root/.github/agents/security-finding-review.agent.md"
+)
+for document in "${policy_documents[@]}"; do
+    require_flat_text "$document" 'reasoning effort `xhigh`'
+    require_flat_text "$document" 'context tier `default` exactly'
+    require_flat_text "$document" \
+        'The Codex effort and context values are not overridable.'
+    require_flat_text "$document" 'only `high`, `xhigh`, or `max`'
+    require_flat_text "$document" \
+        '`unset`, `medium`, `low`, and `minimal` are prohibited'
+    require_flat_text "$document" \
+        'A non-Codex selection imposes no context tier by itself.'
+    require_flat_text "$document" 'later selection of `claude-fable-5.1`'
+    require_text "$document" 'stop rather than silently'
+    refute_pattern "$document" 'context tier `long_context`'
+done
+require_count_at_least "$skill" 'effort `xhigh`' 2
+require_flat_text "$skill" \
+    'with model `gpt-5.3-codex`, reasoning effort `xhigh`, and context tier `default` exactly'
 pm_tasking_command='bash "${PWD%/*}/project-manager/scripts/project-tasking.sh" resolve .'
 for document in "$orchestrator" "$instructions" "$skill" \
     "$repository_root/README.md" "$repository_root/AGENT-INTERFACE.md" \

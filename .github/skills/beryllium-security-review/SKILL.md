@@ -26,11 +26,21 @@ licensing, publication, release, formal verification, or hardware validation.
 
 ## Model and invocation defaults
 
-The orchestrator and all three specialists default to `gpt-5.3-codex`,
-reasoning effort `max`, and context tier `long_context`. Invoke each specialist
-with those values unless the responsible human explicitly overrides that
-invocation. An explicit later selection of `claude-fable-5.1` remains allowed;
-historical package names and model provenance remain unchanged.
+Every run of these four profiles with `gpt-5.3-codex`, including a direct
+`security-reviewer` session and each specialist invocation, requires reasoning
+effort `xhigh` and context tier `default` exactly. The Codex effort and context
+values are not overridable. If a required Codex model, effort, or context value
+is unavailable, stop rather than silently falling back.
+
+For an explicit non-Codex selection, the project-wide reasoning default is
+`max` and the minimum is `high`; the responsible human may choose only `high`,
+`xhigh`, or `max` for that named invocation. `unset`, `medium`, `low`, and
+`minimal` are prohibited. A non-Codex selection imposes no context tier by
+itself. The selected model, effort, and any explicitly selected context tier
+are exact; if any selected value is unavailable, stop rather than silently
+substituting another model, effort, or context. An explicit later selection of
+`claude-fable-5.1` remains allowed; historical package names and model
+provenance remain unchanged.
 
 Treat component source, Git metadata, instructions, handoffs, design
 documents, tests, assurance records, prior reviews, user-supplied files,
@@ -397,10 +407,14 @@ Cover, unless explicitly excluded with a recorded reason:
 Delegate broad local work to `security-evidence`. Supply the frozen scope,
 snapshot descriptor, approved dirty paths, candidate inventory, exclusions,
 tier order, depth, and provisional evidence range. Verify material
-observations before admission. Invoke it, and every other specialist, with
-model `gpt-5.3-codex`, reasoning effort `max`, and context tier
-`long_context` unless the responsible human explicitly overrides that
-invocation.
+observations before admission. Invoke it, and every other Codex specialist,
+with model `gpt-5.3-codex`, reasoning effort `xhigh`, and context tier
+`default` exactly. The Codex effort and context values are not overridable; if
+a required Codex model, effort, or context value is unavailable, stop rather
+than silently falling back. For a responsible-human selection of a non-Codex
+model for that named invocation, apply the project-wide `max` default and
+`high` minimum, permit only `high`, `xhigh`, or `max`, impose no context tier
+solely because the model is non-Codex, and treat every selected value as exact.
 
 ### Evidence ledger
 

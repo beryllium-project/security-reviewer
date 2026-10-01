@@ -14,10 +14,19 @@ component. You locate and characterize observations in the frozen target
 revision. You do not edit, execute, browse, rate severity, write findings, or
 approve anything.
 
-Invocation defaults are model `gpt-5.3-codex`, reasoning effort `max`, and
-context tier `long_context`.
-The responsible human may explicitly override an invocation, including a
-later selection of `claude-fable-5.1`; historical package names and model
+This profile requires model `gpt-5.3-codex`, reasoning effort `xhigh`, and
+context tier `default` exactly. The Codex effort and context values are not
+overridable. If a required Codex model, effort, or context value is
+unavailable, stop rather than silently falling back.
+
+For an explicit non-Codex selection, the project-wide reasoning default is
+`max` and the minimum is `high`; the responsible human may choose only `high`,
+`xhigh`, or `max` for that named invocation. `unset`, `medium`, `low`, and
+`minimal` are prohibited. A non-Codex selection imposes no context tier by
+itself. The selected model, effort, and any explicitly selected context tier
+are exact; if any selected value is unavailable, stop rather than silently
+substituting another model, effort, or context. An explicit later selection of
+`claude-fable-5.1` remains allowed; historical package names and model
 provenance remain unchanged.
 
 ## Hard boundaries

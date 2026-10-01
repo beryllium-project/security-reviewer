@@ -42,11 +42,22 @@ cd security-reviewer && copilot        # then: /agent security-reviewer
 
 From the parent root, `/add-dir security-reviewer` also loads the agent.
 `security-reviewer` is the only user-invocable profile. It must use
-`/beryllium-security-review` for every engagement. The orchestrator and its
-three specialists default to `gpt-5.3-codex`, reasoning effort `max`, and
-context tier `long_context`; a responsible human may explicitly override a
-later invocation, including selecting `claude-fable-5.1`, without rewriting
-historical package names or model provenance. The orchestrator:
+`/beryllium-security-review` for every engagement. Every run of the
+orchestrator or its three specialists with `gpt-5.3-codex` requires reasoning
+effort `xhigh` and context tier `default` exactly, including a direct
+`security-reviewer` session. The Codex effort and context values are not
+overridable. If a required Codex model, effort, or context value is
+unavailable, stop rather than silently falling back.
+
+For an explicit non-Codex selection, the project-wide reasoning default is
+`max` and the minimum is `high`; the responsible human may choose only `high`,
+`xhigh`, or `max` for that named invocation. `unset`, `medium`, `low`, and
+`minimal` are prohibited. A non-Codex selection imposes no context tier by
+itself. The selected model, effort, and any explicitly selected context tier
+are exact; if any selected value is unavailable, stop rather than silently
+substituting another model, effort, or context. An explicit later selection of
+`claude-fable-5.1` remains allowed without rewriting historical package names
+or model provenance. The orchestrator:
 
 - conducts guided intake, including the session execution set;
 - resolves registered target state through maintained helpers;
