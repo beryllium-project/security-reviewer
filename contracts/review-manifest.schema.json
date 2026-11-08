@@ -89,7 +89,8 @@
           "$ref": "#/$defs/package_id"
         },
         "model_id": {
-          "$ref": "#/$defs/declared_id"
+          "$ref": "#/$defs/declared_id",
+          "description": "Publication-safe declared model identifier, or unlisted with a /package/model_id qualification when the declared identifier is not publication-safe."
         },
         "run_id": {
           "$ref": "#/$defs/declared_id"

@@ -151,6 +151,10 @@ public-safe terms and must never contain:
 - non-public identifiers;
 - user-supplied private text.
 
+Treat non-public model codenames as non-public identifiers. Replace them with
+`unlisted` in query planning, logs, citations, and specialist returns without
+reproducing the identifier.
+
 Prefer standards, specifications, papers, upstream repositories, maintainer
 records, CVE and advisory databases, and authoritative security guidance.
 Label secondary sources and vendor claims. Log negative queries and

@@ -24,6 +24,7 @@ const commitPattern = /^(?!0{40}$)[0-9a-f]{40}$/
 const sha256Pattern = /^(?!0{64}$)[0-9a-f]{64}$/
 const signalPattern = /^SIG[A-Z0-9]+$/
 const pathSegmentPattern = /^[A-Za-z0-9][A-Za-z0-9._-]*$/
+const redactedModelId = 'unlisted'
 const schemaPatternCache = new Map()
 const supportedSchemaKeywords = new Set([
   '$defs',
@@ -90,6 +91,10 @@ function validateManifest(manifest, manifestPath) {
     path.dirname(manifestPath),
   )
   validateQualifications(manifest.qualifications)
+  validatePublicationSafeModelId(
+    manifest.package.model_id,
+    manifest.qualifications,
+  )
   return classification
 }
 
@@ -729,6 +734,26 @@ function validateQualifications(values) {
       throw new Error(`${location} duplicates a qualification`)
     }
     qualifications.add(key)
+  }
+}
+
+/*
+ * No denylisted identifier is embedded here in any form. The package
+ * validator delegates denylisted-term detection to the shared publication
+ * gate when it is installed.
+ */
+function validatePublicationSafeModelId(modelId, qualifications) {
+  if (modelId !== redactedModelId) {
+    return
+  }
+  if (
+    !qualifications.some(
+      (qualification) => qualification.field === '/package/model_id',
+    )
+  ) {
+    throw new Error(
+      '/package/model_id value "unlisted" requires a /package/model_id qualification',
+    )
   }
 }
 

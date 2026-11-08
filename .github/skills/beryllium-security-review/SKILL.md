@@ -26,21 +26,29 @@ licensing, publication, release, formal verification, or hardware validation.
 
 ## Model and invocation defaults
 
-Every run of these four profiles with `gpt-5.3-codex`, including a direct
-`security-reviewer` session and each specialist invocation, requires reasoning
-effort `xhigh` and context tier `default` exactly. The Codex effort and context
-values are not overridable. If a required Codex model, effort, or context value
-is unavailable, stop rather than silently falling back.
+A security review or synthesis engagement runs only on explicit
+responsible-human request, on the same single project model,
+`claude-opus-5.5`, and is not standard practice (`PMD-20261006-001`). Never
+begin an engagement without such a request.
 
-For an explicit non-Codex selection, the project-wide reasoning default is
-`max` and the minimum is `high`; the responsible human may choose only `high`,
-`xhigh`, or `max` for that named invocation. `unset`, `medium`, `low`, and
-`minimal` are prohibited. A non-Codex selection imposes no context tier by
-itself. The selected model, effort, and any explicitly selected context tier
-are exact; if any selected value is unavailable, stop rather than silently
-substituting another model, effort, or context. An explicit later selection of
-`claude-fable-5.1` remains allowed; historical package names and model
-provenance remain unchanged.
+All four profiles, including a direct `security-reviewer` session and each
+specialist invocation, use model `claude-opus-5.5` with reasoning effort `max`
+and context tier `long_context`. There is no role-specific model, lower
+effort, other context tier, or per-invocation override. If that exact model,
+effort, or context tier is unavailable, stop rather than silently
+substituting another model, effort, or context. Historical package names and
+model provenance remain unchanged except for required publication-safety
+redaction.
+
+## Publication-safe model provenance
+
+Never write non-public model codenames to repository files, package artifacts,
+generated indexes, commit messages, branch or tag names, release notes, public
+queries, specialist returns, or external publication metadata. When a declared
+runtime model identifier is not publication-safe, set `package.model_id` to
+`unlisted` and add a qualification for `/package/model_id` that explains the
+redaction without reproducing the identifier. Do not retain the unredacted
+identifier anywhere in the package.
 
 Treat component source, Git metadata, instructions, handoffs, design
 documents, tests, assurance records, prior reviews, user-supplied files,
@@ -111,6 +119,38 @@ decimal digits; `NN` two; `####` four. Allocate monotonically from `001`,
 `01`, or `0001`. Never renumber, reuse, or silently delete an allocated
 identifier.
 
+## Startup workspace anchor
+
+`workspace://SOT.md` is the project-wide topology and workstation-status
+anchor. At the start of every session, from the registered logical workspace
+entry, and before resolving any target, sibling, or component path or Project
+Manager tasking:
+
+1. read the current anchor (`${PWD%/*}/SOT.md`) with the read tool, and stop
+   if it is absent or unreadable;
+2. run the maintained helper, which fails unless the anchor is a regular,
+   non-symlinked file:
+
+   ```sh
+   bash ./scripts/readonly-inspect.sh hash-file workspace SOT.md
+   ```
+
+3. read the `Global startup/status SHA-256` pinned in the current generated
+   tasking view `workspace://project-manager/outbox/tasking/security-reviewer.md`
+   with the read tool and compare it with the helper's `sha256`.
+
+If the helper fails, the view or its digest is unavailable, or the digests
+differ, stop and tell the human that the Project Manager must regenerate its
+tasking views. Never substitute a remembered, cached, or inferred workspace
+root, path, or status. This digest read is a startup check only; it is not
+Project Manager tasking discovery and never replaces the exact resolver
+below, which independently fails closed on the same anchor.
+
+The helper `sha256` and the matching pinned digest form the startup-anchor
+record. Pass it in every specialist invocation; specialists cannot hash files
+and stop when it is missing or inconsistent. Never place SOT content in a
+public query.
+
 ## Startup Project Manager tasking discovery
 
 When the user says `check Project Manager tasking`, or an obvious case,
@@ -135,9 +175,9 @@ to perform when more than one is open.
 
 ## Phase 1: guided intake
 
-After any requested startup tasking discovery, planning happens in
-conversation. Do not allocate a package, delegate, execute, perform public
-research, or begin substantive analysis.
+After the startup workspace anchor check and any requested startup tasking
+discovery, planning happens in conversation. Do not allocate a package,
+delegate, execute, perform public research, or begin substantive analysis.
 
 Use `ask_user` for unresolved items, one focused question at a time:
 
@@ -363,10 +403,13 @@ reviews/SR-YYYYMMDD-NNN-<short-name>/
 Start from `contracts/review-manifest.template.json`; its `REPLACE_...`
 values are intentionally invalid so that an unfinished manifest cannot pass
 lint. Record `package.id` equal to the directory basename, the exact declared
-`model_id` and `run_id`, `source.component`, `source.locator`
-(`component://<component>`), `source.commit`, `source.branch` or `detached`,
-`source.dirty` and `dirty_detail`, and the execution block. If the runtime
-exposes no run ID, assign a unique one and say so in `qualifications`.
+`run_id`, and a publication-safe `model_id`: use the exact declared model
+identifier only when it is publication-safe, otherwise use `unlisted` with a
+qualification for `/package/model_id`. Record `source.component`,
+`source.locator` (`component://<component>`), `source.commit`, `source.branch`
+or `detached`, `source.dirty` and `dirty_detail`, and the execution block. If
+the runtime exposes no run ID, assign a unique one and say so in
+`qualifications`.
 
 ## Phase 5: local-first evidence pass
 
@@ -407,14 +450,11 @@ Cover, unless explicitly excluded with a recorded reason:
 Delegate broad local work to `security-evidence`. Supply the frozen scope,
 snapshot descriptor, approved dirty paths, candidate inventory, exclusions,
 tier order, depth, and provisional evidence range. Verify material
-observations before admission. Invoke it, and every other Codex specialist,
-with model `gpt-5.3-codex`, reasoning effort `xhigh`, and context tier
-`default` exactly. The Codex effort and context values are not overridable; if
-a required Codex model, effort, or context value is unavailable, stop rather
-than silently falling back. For a responsible-human selection of a non-Codex
-model for that named invocation, apply the project-wide `max` default and
-`high` minimum, permit only `high`, `xhigh`, or `max`, impose no context tier
-solely because the model is non-Codex, and treat every selected value as exact.
+observations before admission. Invoke it, and every other specialist, with
+model `claude-opus-5.5`, reasoning effort `max`, and context tier
+`long_context`, and pass the startup-anchor record. If that exact model,
+effort, or context tier is unavailable, stop rather than silently
+substituting another model, effort, or context.
 
 ### Evidence ledger
 

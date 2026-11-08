@@ -20,6 +20,7 @@ agent never grants or infers publication, release, or sign-off.
 - [ ] Redistribution status is recorded for every external source.
 - [ ] Findings and claims do not exceed their evidence and the manifest.
 - [ ] Every executed command has an approval record and retained evidence.
+- [ ] Model identifiers and provenance are publication-safe; non-public model identifiers are replaced with `unlisted` and the redaction is explained without reproducing them.
 - [ ] Responsible-human promotion record is complete when promotion is requested.
 
 ## Human promotion record

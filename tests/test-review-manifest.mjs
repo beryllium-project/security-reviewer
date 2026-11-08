@@ -149,6 +149,20 @@ try {
     'static-only',
   )
 
+  const redactedModel = staticManifest(fixtureId('redacted-model'))
+  redactedModel.package.model_id = 'unlisted'
+  redactedModel.qualifications = [
+    {
+      field: '/package/model_id',
+      reason:
+        'Publication-safe redaction of a non-public runtime model identifier.',
+    },
+  ]
+  expectAccepted(
+    writeFixture(fixtureId('redacted-model'), redactedModel),
+    'static-only',
+  )
+
   const maximumExit = executionManifest(fixtureId('exit-code-maximum'))
   maximumExit.manifest.execution.commands_attempted[0].exit_result.code = 255
   expectAccepted(
@@ -529,6 +543,14 @@ try {
       manifest.package.id = fixtureId('different-package')
     },
     /must match package directory/,
+  )
+  expectRejected(
+    'unqualified-redacted-model',
+    staticFixture,
+    (manifest) => {
+      manifest.package.model_id = 'unlisted'
+    },
+    /value "unlisted" requires a \/package\/model_id qualification/,
   )
   expectSchemaRejected(
     'unexpected-metadata',

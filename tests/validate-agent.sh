@@ -71,16 +71,6 @@ require_flat_text() {
     fi
 }
 
-require_count_at_least() {
-    local file=$1 needle=$2 minimum=$3 count
-    count=$(grep -Fc -- "$needle" "$file" 2>/dev/null || true)
-    if [[ -f $file ]] && ((count >= minimum)); then
-        pass "${file#"$repository_root/"} states $needle at least $minimum times"
-    else
-        fail "${file#"$repository_root/"} states $needle only $count times; expected at least $minimum"
-    fi
-}
-
 require_pattern() {
     if [[ -f $1 ]] && grep -Eq -- "$2" "$1"; then
         pass "${1#"$repository_root/"} matches: $2"
@@ -94,6 +84,17 @@ refute_pattern() {
         fail "${1#"$repository_root/"} must not match: $2"
     else
         pass "${1#"$repository_root/"} does not match: $2"
+    fi
+}
+
+require_before() {
+    local file=$1 first=$2 second=$3 first_line second_line
+    first_line=$(grep -En -m 1 -- "$first" "$file" 2>/dev/null | cut -d: -f1)
+    second_line=$(grep -En -m 1 -- "$second" "$file" 2>/dev/null | cut -d: -f1)
+    if [[ -n $first_line && -n $second_line ]] && ((first_line < second_line)); then
+        pass "${file#"$repository_root/"} places $first before $second"
+    else
+        fail "${file#"$repository_root/"} must place $first before $second"
     fi
 }
 
@@ -251,16 +252,50 @@ done < <(find "$repository_root" -path "$repository_root/.git" -prune -o \
     -type f -print | sort)
 ((path_failures > 0)) || pass "no absolute workstation path in tracked files"
 
+# No denylisted identifier is embedded in this repository in any form. When
+# the shared publication gate (PMD-20261108-001) is installed, its scan-tree
+# checks every publishable file against the private denylist.
+publication_gate_config=${XDG_CONFIG_HOME:-${HOME:+$HOME/.config}}
+installed_publication_gate=
+[[ -z $publication_gate_config ]] ||
+    installed_publication_gate=$publication_gate_config/beryllium/publication-gate/bin/publication-gate
+publication_gate_installed=false
+if [[ -n $installed_publication_gate ]] &&
+    [[ -e $installed_publication_gate || -L $installed_publication_gate ]]; then
+    publication_gate_installed=true
+fi
+if $publication_gate_installed; then
+    mapfile -t publishable_files < <(find . -path ./.git -prune -o \
+        -path ./inbox -prune -o -path ./scratch -prune -o \
+        -path ./build -prune -o -path ./.test-output -prune -o \
+        -type f -print | sort)
+    gate_output=$(python3 -I -B "$installed_publication_gate" scan-tree \
+        "${publishable_files[@]}" 2>&1)
+    gate_status=$?
+    if ((gate_status == 0)); then
+        pass "publication gate scan-tree finds no denylisted term in ${#publishable_files[@]} publishable repository files"
+    else
+        printf '%s\n' "$gate_output" | grep -E ': (FINDING|ERROR) ' | head -n 20
+        fail "publication gate scan-tree rejects the publishable repository files (exit $gate_status)"
+    fi
+else
+    printf 'skip %s\n' 'publication gate is not installed; denylisted-term scan of publishable repository files skipped'
+fi
+
 printf '\n== agent declarations and boundaries ==\n'
 
 orchestrator=$repository_root/.github/agents/security-reviewer.agent.md
 require_pattern "$orchestrator" '^name: security-reviewer$'
 require_pattern "$orchestrator" '^user-invocable: true$'
 require_pattern "$orchestrator" '^disable-model-invocation: true$'
-require_pattern "$orchestrator" '^model: gpt-5.3-codex$'
-require_text "$orchestrator" 'reasoning effort `xhigh`'
-require_text "$orchestrator" 'context tier `default`'
-require_text "$orchestrator" 'direct `security-reviewer` session'
+require_pattern "$orchestrator" '^model: claude-opus-5\.5$'
+require_flat_text "$orchestrator" 'reasoning effort `max`'
+require_flat_text "$orchestrator" 'context tier `long_context`'
+require_flat_text "$orchestrator" 'direct `security-reviewer` session'
+require_flat_text "$orchestrator" \
+    'Every specialist invocation passes model `claude-opus-5.5`, reasoning effort `max`, context tier `long_context`, and the startup-anchor record'
+require_before "$orchestrator" '^## Workspace startup anchor$' \
+    '^## Project Manager startup discovery$'
 for tool in read search execute edit agent web ask_user; do
     require_pattern "$orchestrator" "\"$tool\""
 done
@@ -275,10 +310,13 @@ for specialist in security-evidence security-research security-finding-review; d
     agent=$repository_root/.github/agents/$specialist.agent.md
     require_pattern "$agent" "^name: $specialist\$"
     require_pattern "$agent" '^user-invocable: false$'
-    require_pattern "$agent" '^model: gpt-5.3-codex$'
-    require_text "$agent" 'reasoning effort `xhigh`'
-    require_text "$agent" 'context tier `default`'
-    require_flat_text "$agent" 'later selection of `claude-fable-5.1`'
+    require_pattern "$agent" '^model: claude-opus-5\.5$'
+    require_flat_text "$agent" 'reasoning effort `max`'
+    require_flat_text "$agent" 'context tier `long_context`'
+    require_flat_text "$agent" \
+        'Before resolving any target, sibling, or component path, read the current `workspace://SOT.md`'
+    require_flat_text "$agent" 'startup-anchor record'
+    require_before "$agent" '^## Workspace startup anchor$' '^## Required input$'
     refute_pattern "$agent" '"edit"'
     refute_pattern "$agent" '"execute"'
     refute_pattern "$agent" '"agent"'
@@ -290,6 +328,8 @@ for specialist in security-evidence security-research security-finding-review; d
     fi
 done
 require_pattern "$repository_root/.github/agents/security-research.agent.md" '"web"'
+require_flat_text "$repository_root/.github/agents/security-research.agent.md" \
+    'never place it in a public query'
 refute_pattern "$repository_root/.github/agents/security-evidence.agent.md" '"web"'
 refute_pattern "$repository_root/.github/agents/security-finding-review.agent.md" '"web"'
 
@@ -307,28 +347,49 @@ policy_documents=(
     "$repository_root/.github/agents/security-finding-review.agent.md"
 )
 for document in "${policy_documents[@]}"; do
-    require_flat_text "$document" 'reasoning effort `xhigh`'
-    require_flat_text "$document" 'context tier `default` exactly'
+    require_flat_text "$document" '`claude-opus-5.5`'
+    require_flat_text "$document" 'reasoning effort `max`'
+    require_flat_text "$document" 'context tier `long_context`'
     require_flat_text "$document" \
-        'The Codex effort and context values are not overridable.'
-    require_flat_text "$document" 'only `high`, `xhigh`, or `max`'
+        'There is no role-specific model, lower effort, other context tier, or per-invocation override.'
     require_flat_text "$document" \
-        '`unset`, `medium`, `low`, and `minimal` are prohibited'
-    require_flat_text "$document" \
-        'A non-Codex selection imposes no context tier by itself.'
-    require_flat_text "$document" 'later selection of `claude-fable-5.1`'
-    require_text "$document" 'stop rather than silently'
-    refute_pattern "$document" 'context tier `long_context`'
+        'stop rather than silently substituting another model, effort, or context'
+    require_flat_text "$document" 'non-public model codenames'
+    require_flat_text "$document" '`unlisted`'
+    require_flat_text "$document" 'workspace://SOT.md'
+    require_flat_text "$document" 'hash-file workspace SOT.md'
+    for retired in 'gpt-5\.3-codex' '[Cc]odex' 'xhigh' 'claude-fable' \
+        'context tier `default`' 'minimum is `high`'; do
+        refute_pattern "$document" "$retired"
+    done
 done
-require_count_at_least "$skill" 'effort `xhigh`' 2
+for document in "$orchestrator" "$instructions" "$skill" \
+    "$repository_root/README.md" "$repository_root/AGENT-INTERFACE.md"; do
+    require_flat_text "$document" 'runs only on explicit responsible-human request'
+    require_flat_text "$document" 'is not standard practice'
+done
+for document in "$orchestrator" "$instructions" "$skill"; do
+    require_text "$document" \
+        'bash ./scripts/readonly-inspect.sh hash-file workspace SOT.md'
+    require_text "$document" \
+        'workspace://project-manager/outbox/tasking/security-reviewer.md'
+    require_flat_text "$document" 'Global startup/status SHA-256'
+    require_flat_text "$document" \
+        'before resolving any target, sibling, or component path or Project Manager tasking'
+    require_flat_text "$document" 'never replaces the exact resolver'
+done
+require_before "$instructions" '^## Workspace startup anchor$' \
+    '^## Project Manager startup discovery$'
+require_before "$skill" '^## Startup workspace anchor$' \
+    '^## Startup Project Manager tasking discovery$'
 require_flat_text "$skill" \
-    'with model `gpt-5.3-codex`, reasoning effort `xhigh`, and context tier `default` exactly'
+    'with model `claude-opus-5.5`, reasoning effort `max`, and context tier `long_context`, and pass the startup-anchor record'
 pm_tasking_command='bash "${PWD%/*}/project-manager/scripts/project-tasking.sh" resolve .'
 for document in "$orchestrator" "$instructions" "$skill" \
     "$repository_root/README.md" "$repository_root/AGENT-INTERFACE.md" \
     "$repository_root/HANDOFF.md"; do
     require_text "$document" "$pm_tasking_command"
-    require_text "$document" 'gpt-5.3-codex'
+    require_text "$document" 'claude-opus-5.5'
 done
 for document in "$orchestrator" "$instructions" "$skill" \
     "$repository_root/README.md" "$repository_root/AGENT-INTERFACE.md"; do
@@ -370,6 +431,10 @@ require_text "$repository_root/templates/execution-approvals.md" 'No approvals r
 require_text "$repository_root/templates/execution-approvals.md" '- Quoted approval: "'
 require_text "$repository_root/templates/03-findings.md" '- Alternatives and counter-evidence:'
 require_text "$repository_root/templates/03-findings.md" 'No findings recorded.'
+require_flat_text "$repository_root/templates/publication-checklist.md" \
+    'non-public model identifiers are replaced with `unlisted`'
+require_flat_text "$repository_root/contracts/REVIEW-PROVENANCE.md" \
+    'otherwise use `unlisted` and qualify `/package/model_id`'
 require_text "$repository_root/outbox/pm-queue.md" 'SRQ-'
 
 printf '\n== manifest linter unit tests ==\n'
@@ -546,6 +611,61 @@ printf '\nEvidence copy: /%s\n' 'home/example/private.txt' >>"$root/$review_path
 expect_message "rejects an absolute workstation path" \
     'absolute workstation path' \
     bash -c "cd '$root' && scripts/validate-security-review.sh '$review_path'"
+
+root=$(copy_validation_root)
+mkdir -p -- "$sandbox/no-gate-config"
+output=$(cd "$root" && XDG_CONFIG_HOME=$sandbox/no-gate-config \
+    scripts/validate-security-review.sh "$review_path" 2>&1)
+if (($? == 0)) && printf '%s\n' "$output" | grep -Fq 'denylisted-term scan skipped'; then
+    pass "validator prints a notice and skips the denylisted-term scan without the publication gate"
+else
+    fail "validator must pass with a skip notice when the publication gate is absent"
+fi
+
+# A synthetic denylist entry exercises the delegated scan; it is never a real
+# entry, and the real denylist is never read or copied here.
+synthetic_denylist_term=zq-synthetic-gate-term-41
+if $publication_gate_installed && command -v python3 >/dev/null 2>&1; then
+    synthetic_gate_config=$sandbox/synthetic-gate-config
+    synthetic_gate=$synthetic_gate_config/beryllium/publication-gate
+    mkdir -p -- "$synthetic_gate/bin"
+    cp -- "$installed_publication_gate" "$synthetic_gate/bin/publication-gate"
+    (umask 077 && printf '%s\n' "$synthetic_denylist_term" >"$synthetic_gate/denylist")
+
+    root=$(copy_validation_root)
+    expect_pass "validator passes a clean package through the publication gate" \
+        env XDG_CONFIG_HOME="$synthetic_gate_config" \
+        bash -c "cd '$root' && scripts/validate-security-review.sh '$review_path'"
+
+    root=$(copy_validation_root)
+    printf '\nModel: %s\n' "$synthetic_denylist_term" >>"$root/$review_path/README.md"
+    expect_message "validator rejects a synthetic denylisted term through the publication gate" \
+        'publication gate scan-tree found a denylisted term' \
+        env XDG_CONFIG_HOME="$synthetic_gate_config" \
+        bash -c "cd '$root' && scripts/validate-security-review.sh '$review_path'"
+
+    synthetic_codes=
+    for ((i = 0; i < ${#synthetic_denylist_term}; i++)); do
+        character=${synthetic_denylist_term:i:1}
+        [[ $character == [[:alnum:]] ]] || continue
+        printf -v synthetic_codes '%s%d, ' "$synthetic_codes" "'$character"
+    done
+    root=$(copy_validation_root)
+    printf '\nCodes: [%s]\n' "${synthetic_codes%, }" >>"$root/$review_path/README.md"
+    expect_message "draft validator rejects a character-code encoding of a synthetic denylisted term" \
+        'publication gate scan-tree found a denylisted term' \
+        env XDG_CONFIG_HOME="$synthetic_gate_config" \
+        bash -c "cd '$root' && scripts/validate-security-review.sh --draft '$review_path'"
+
+    : >"$synthetic_gate/denylist"
+    root=$(copy_validation_root)
+    expect_message "validator fails closed when the installed publication gate cannot scan" \
+        'publication gate scan-tree could not scan the package' \
+        env XDG_CONFIG_HOME="$synthetic_gate_config" \
+        bash -c "cd '$root' && scripts/validate-security-review.sh '$review_path'"
+else
+    printf 'skip %s\n' 'publication gate is not installed; synthetic denylisted-term delegation tests skipped'
+fi
 
 root=$(copy_validation_root)
 printf '\nCompare SR-20000101-009-other-review.\n' >>"$root/$review_path/README.md"

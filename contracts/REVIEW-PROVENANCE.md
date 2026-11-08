@@ -59,7 +59,7 @@ package identity and provenance.
 | Field | Required meaning |
 | --- | --- |
 | `package.id` | Exact package-directory basename, `SR-YYYYMMDD-NNN-<short-name>`. |
-| `package.model_id` | Exact model identifier declared by the runtime or orchestrator. |
+| `package.model_id` | Publication-safe model identifier. Use the exact declared identifier only when it is publication-safe; otherwise use `unlisted` and qualify `/package/model_id`. |
 | `package.run_id` | Exact unique run identifier declared by the runtime or orchestrator. |
 | `source.component` | Registered name of the reviewed component (lowercase portable identifier). The linter checks the form; the validator checks registration. |
 | `source.locator` | Logical locator of the reviewed component, exactly `component://` followed by `source.component`. |
@@ -77,10 +77,15 @@ package identity and provenance.
 | `execution.retained_evidence` | Package-relative evidence path under `evidence/APPROVAL-NNN/`, lowercase SHA-256, and producing command ID. |
 | `qualifications` | Structured explanations for externally supplied or otherwise unverifiable metadata. |
 
-Use the identifiers exactly as declared. If the runtime exposes no run ID, the
-orchestrator must assign a unique one and record that fact in `qualifications`;
-do not invent a vendor-issued identifier. A qualification never overrides a
-schema or lint failure.
+Use identifiers exactly as declared except for publication-safe model
+redaction. If a declared model identifier contains a non-public codename or is
+otherwise unsuitable for publication, record `unlisted` and add a
+`/package/model_id` qualification that explains the redaction without
+reproducing the identifier. Never retain the unredacted identifier elsewhere
+in the package. If the runtime exposes no run ID, the orchestrator must assign
+a unique one and record that fact in `qualifications`; do not invent a
+vendor-issued identifier. A qualification never overrides a schema or lint
+failure.
 
 ## Classification rules
 

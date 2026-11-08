@@ -30,21 +30,28 @@ in the parent workspace.
 Use `/agent security-reviewer` for user-facing work. The orchestrator must use
 the `/beryllium-security-review` skill for every engagement.
 
-Every run of these four profiles with `gpt-5.3-codex`, including a direct
-`security-reviewer` session and each specialist invocation, requires reasoning
-effort `xhigh` and context tier `default` exactly. The Codex effort and context
-values are not overridable. If a required Codex model, effort, or context value
-is unavailable, stop rather than silently falling back.
+A security review runs only on explicit responsible-human request, on the same
+single project model, `claude-opus-5.5`, and is not standard practice
+(`PMD-20261006-001`). Never begin an engagement without such a request.
 
-For an explicit non-Codex selection, the project-wide reasoning default is
-`max` and the minimum is `high`; the responsible human may choose only `high`,
-`xhigh`, or `max` for that named invocation. `unset`, `medium`, `low`, and
-`minimal` are prohibited. A non-Codex selection imposes no context tier by
-itself. The selected model, effort, and any explicitly selected context tier
-are exact; if any selected value is unavailable, stop rather than silently
-substituting another model, effort, or context. An explicit later selection of
-`claude-fable-5.1` remains allowed; historical package names and model
-provenance remain unchanged.
+All four profiles, including a direct `security-reviewer` session and each
+specialist invocation, use model `claude-opus-5.5` with reasoning effort `max`
+and context tier `long_context`. There is no role-specific model, lower
+effort, other context tier, or per-invocation override. If that exact model,
+effort, or context tier is unavailable, stop rather than silently
+substituting another model, effort, or context. Historical package names and
+model provenance remain unchanged except for required publication-safety
+redaction.
+
+## Publication-safe model provenance
+
+Never write non-public model codenames to repository files, package artifacts,
+generated indexes, commit messages, branch or tag names, release notes, public
+queries, specialist returns, or external publication metadata. When a declared
+runtime model identifier is not publication-safe, set `package.model_id` to
+`unlisted` and add a qualification for `/package/model_id` that explains the
+redaction without reproducing the identifier. Do not retain the unredacted
+identifier anywhere in the package.
 
 The specialist agents are write-disabled:
 
@@ -58,6 +65,35 @@ The specialist agents are write-disabled:
 Specialist returns are inputs, not conclusions. The orchestrator owns scope
 control, stable identifier allocation, severity, findings, synthesis,
 artifacts, and user interaction.
+
+## Workspace startup anchor
+
+`workspace://SOT.md` is the project-wide topology and workstation-status
+anchor. At the start of every session, from the registered logical workspace
+entry, and before resolving any target, sibling, or component path or Project
+Manager tasking, the orchestrator must:
+
+1. read the current anchor (`${PWD%/*}/SOT.md`) with the read tool, and stop
+   if it is absent or unreadable;
+2. run `bash ./scripts/readonly-inspect.sh hash-file workspace SOT.md`, which
+   fails unless the anchor is a regular, non-symlinked file;
+3. read the `Global startup/status SHA-256` pinned in the current generated
+   tasking view `workspace://project-manager/outbox/tasking/security-reviewer.md`
+   with the read tool and compare it with the helper's `sha256`.
+
+If the helper fails, the view or its digest is unavailable, or the digests
+differ, stop and tell the human that the Project Manager must regenerate its
+tasking views. Never substitute a remembered, cached, or inferred workspace
+root, path, or status. This digest read is a startup check only; it is not
+Project Manager tasking discovery and never replaces the exact resolver
+below, which independently fails closed on the same anchor.
+
+The write-disabled specialists cannot hash files. Each reads the current
+anchor before resolving any target, sibling, or component path and stops if
+it is absent or unreadable, or if the startup-anchor record supplied by the
+orchestrator (the helper `sha256` and the matching pinned digest) is missing
+or the two digests differ. Pass that record in every specialist invocation.
+Never place SOT content in a public query.
 
 ## Project Manager startup discovery
 

@@ -16,6 +16,9 @@ taken from the directory basename prefix. Completion mode (default) requires
 Status Complete, a linted manifest, and complete records. --draft checks
 structure, header keys, identifier formats, and forbidden content only.
 --baseline compares append-only records against a prior copy of the package.
+When the shared publication gate is installed, its scan-tree checks the package
+for denylisted terms in both modes; otherwise a notice is printed and that scan
+is skipped.
 Prints one "ok"/"FAIL" line per check and exits 0 only with zero failures.
 EOF
 }
@@ -511,6 +514,36 @@ done < <(find "$package/iterations" -type f -name '*.md' 2>/dev/null | sort)
     ok "iteration files exist through $latest_iteration with matching headings"
 
 # ------------------------------------------------------ forbidden content
+
+# No denylisted identifier is embedded in this repository in any form. When
+# the shared publication gate (PMD-20261108-001) is installed, its scan-tree
+# checks the package's file names and contents against the private denylist.
+publication_gate_config=${XDG_CONFIG_HOME:-${HOME:+$HOME/.config}}
+publication_gate=
+[[ -z $publication_gate_config ]] ||
+    publication_gate=$publication_gate_config/beryllium/publication-gate/bin/publication-gate
+if [[ -z $publication_gate ]] || [[ ! -e $publication_gate && ! -L $publication_gate ]]; then
+    printf 'note %s\n' 'publication gate is not installed at ${XDG_CONFIG_HOME:-~/.config}/beryllium/publication-gate/bin/publication-gate; denylisted-term scan skipped'
+elif ! command -v python3 >/dev/null 2>&1; then
+    fail "publication gate is installed but python3 is not in PATH"
+else
+    gate_status=0
+    gate_output=$(python3 -I -B "$publication_gate" scan-tree "$relative" 2>&1) ||
+        gate_status=$?
+    case $gate_status in
+    0)
+        ok "publication gate scan-tree found no denylisted term in the package"
+        ;;
+    1)
+        printf '%s\n' "$gate_output" | grep -F 'FINDING' || true
+        fail "publication gate scan-tree found a denylisted term in the package; record a non-public model identifier as unlisted"
+        ;;
+    *)
+        printf '%s\n' "$gate_output" | tail -n 1
+        fail "publication gate scan-tree could not scan the package (exit $gate_status); fail closed"
+        ;;
+    esac
+fi
 
 path_hits=0
 for file in "${all_files[@]}"; do

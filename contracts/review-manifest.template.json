@@ -5,7 +5,7 @@
   "copyright": "Copyright (C) 2026 James Morris <jamorris@linux.microsoft.com>",
   "package": {
     "id": "REPLACE_WITH_SR_PACKAGE_ID",
-    "model_id": "REPLACE_WITH_EXACT_DECLARED_MODEL_ID",
+    "model_id": "REPLACE_WITH_PUBLICATION_SAFE_MODEL_ID",
     "run_id": "REPLACE_WITH_EXACT_DECLARED_RUN_ID"
   },
   "source": {

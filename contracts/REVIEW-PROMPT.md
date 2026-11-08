@@ -32,15 +32,16 @@ perform a detailed and comprehensive security review of the component [TARGET CO
 
 do not use any other security review as input. under contracts/, read only the shared REVIEW-PROMPT.md, REVIEW-PROVENANCE.md, review-manifest.schema.json, and review-manifest.template.json process files. do not read, cite, summarize, or reconcile any other review package for this target, whether a local reviews/SR-* package or a package stored inside the target (for example an agent-review/ directory). base the review only on the target's sources, docs, tests, scripts, and tooling at the stated commit.
 
-for this new package, create review-manifest.json from the shared template. make its package id match the package directory and record the registered component name and locator, the exact declared model id, run id, source commit, full branch ref or detached state, and dirty state. classify the review as static-only when no target-inspection, build, test, or execution command was attempted. otherwise classify it as execution-backed and record every such command attempted, including failures, its APPROVAL-NNN record, the referenced tool versions, exact exit results, and retained evidence files with sha256 hashes. run a command only when a responsible human approved that exact command in this session and only through scripts/run-approved-command.sh. do not claim execution that is not represented by consistent manifest metadata and retained evidence.
+for this new package, create review-manifest.json from the shared template. make its package id match the package directory and record the registered component name and locator, exact run id, source commit, full branch ref or detached state, and dirty state. record the exact declared model id only when it is publication-safe; otherwise use `unlisted`, add a qualification for `/package/model_id` that explains the redaction without reproducing the identifier, and do not retain the unredacted identifier elsewhere in the package. classify the review as static-only when no target-inspection, build, test, or execution command was attempted. otherwise classify it as execution-backed and record every such command attempted, including failures, its APPROVAL-NNN record, the referenced tool versions, exact exit results, and retained evidence files with sha256 hashes. run a command only when a responsible human approved that exact command in this session and only through scripts/run-approved-command.sh. do not claim execution that is not represented by consistent manifest metadata and retained evidence.
 ```
 
 ## Expected output layout
 
 Choose the package id through `scripts/new-security-review.sh <short-name>
 <title>`, which allocates a unique `SR-YYYYMMDD-NNN-<short-name>` and makes
-it equal to `package.id` in the manifest. Keep the exact runtime identifiers
-separately in `package.model_id` and `package.run_id`.
+it equal to `package.id` in the manifest. Keep the exact runtime `run_id`.
+Record `package.model_id` exactly only when publication-safe; otherwise use
+`unlisted` with the required qualification.
 
 Report set (keep the names so packages stay comparable with each other and
 with the retained historical Helium packages):

@@ -27,28 +27,34 @@ local-first evidence order, runs only commands the user approved by exact
 text, obtains an independent write-disabled finding review, validates the
 package against its manifest, and records a restartable handoff.
 
-Every run of the orchestrator or its three specialists with `gpt-5.3-codex`
-requires reasoning effort `xhigh` and context tier `default` exactly,
-including a direct `security-reviewer` session. The Codex effort and context
-values are not overridable. If a required Codex model, effort, or context
-value is unavailable, stop rather than silently falling back.
+A security review runs only on explicit responsible-human request, on the
+same single project model, `claude-opus-5.5`, and is not standard practice
+(`PMD-20261006-001`); the agent never begins an engagement without such a
+request.
 
-For an explicit non-Codex selection, the project-wide reasoning default is
-`max` and the minimum is `high`; the responsible human may choose only `high`,
-`xhigh`, or `max` for that named invocation. `unset`, `medium`, `low`, and
-`minimal` are prohibited. A non-Codex selection imposes no context tier by
-itself. The selected model, effort, and any explicitly selected context tier
-are exact; if any selected value is unavailable, stop rather than silently
-substituting another model, effort, or context. An explicit later selection of
-`claude-fable-5.1` remains allowed; historical package names and model
-provenance remain unchanged.
+The orchestrator, including a direct `security-reviewer` session, and its
+three specialists use model `claude-opus-5.5` with reasoning effort `max` and
+context tier `long_context`. There is no role-specific model, lower effort,
+other context tier, or per-invocation override. If that exact model, effort,
+or context tier is unavailable, stop rather than silently substituting
+another model, effort, or context. Historical package names and model
+provenance remain unchanged except for required publication-safety redaction.
+
+## Publication-safe model provenance
+
+Never write non-public model codenames to repository files, package artifacts,
+generated indexes, commit messages, branch or tag names, release notes, public
+queries, specialist returns, or external publication metadata. When a declared
+runtime model identifier is not publication-safe, `package.model_id` is
+`unlisted` and `/package/model_id` carries a qualification that explains the
+redaction without reproducing the identifier.
 
 ## Status
 
 New component. No engagement has been run; `reviews/` and `syntheses/` are
 empty and `SECURITY-REVIEWS.md` records an empty package set. The repository
-has a private `origin`; its exact push and backup state is recorded in
-`HANDOFF.md`.
+has a public `origin`; repository visibility, exact push state, and backup
+status are recorded in `HANDOFF.md`.
 
 ## Safety boundary
 
@@ -65,6 +71,14 @@ output is retained under the package `evidence/` directory and hashed into
 `review-manifest.json`. The agent uses only the maintained helper allowlist
 defined in `.github/copilot-instructions.md`. Public research is performed
 through the web tool using generic public-safe terms.
+
+Every session first reads the current `workspace://SOT.md` startup anchor and
+checks it with `bash ./scripts/readonly-inspect.sh hash-file workspace SOT.md`
+against the `Global startup/status SHA-256` pinned in the current generated
+Project Manager tasking view, before resolving any target, sibling, or
+component path or Project Manager tasking. An absent, symlinked, or
+SHA-drifted anchor stops startup. The write-disabled specialists read the
+anchor and rely on the digest record the orchestrator supplies.
 
 The sole sibling-command exception is startup discovery for the phrase
 `check Project Manager tasking` and obvious variants:
@@ -168,6 +182,13 @@ require:
 Missing tools are reported as hard validation failures; the agent never
 installs them implicitly.
 
+No denylisted identifier is embedded in this repository in any form. When the
+shared Beryllium publication gate is installed at
+`${XDG_CONFIG_HOME:-~/.config}/beryllium/publication-gate/bin/publication-gate`,
+`scripts/validate-security-review.sh` and `tests/validate-agent.sh` run its
+`scan-tree` with Python 3 and fail on a finding or when it cannot scan;
+without it they print a notice and skip that scan.
+
 ## Durable packages
 
 ```text
@@ -239,7 +260,8 @@ successor.
   target except commands the user approves by exact text, one approval each.
 - Not a replacement for Helium's `agent-review/`: that directory and its
   retained packages remain untouched in Helium.
-- Not a publisher: it has no remote, never pushes, and never promotes a
-  package beyond `private` without a responsible-human record.
+- Not a publication authority: the agent never pushes, changes repository
+  visibility, or promotes a package beyond `private`. Responsible-human pushes
+  to the public remote and package-promotion records are separate human gates.
 - Not a threat modeler, provenance reviewer, or analysis workbook: it reads
   their completed packages as evidence and does not redo their work.

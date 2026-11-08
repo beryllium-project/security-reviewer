@@ -42,23 +42,30 @@ cd security-reviewer && copilot        # then: /agent security-reviewer
 
 From the parent root, `/add-dir security-reviewer` also loads the agent.
 `security-reviewer` is the only user-invocable profile. It must use
-`/beryllium-security-review` for every engagement. Every run of the
-orchestrator or its three specialists with `gpt-5.3-codex` requires reasoning
-effort `xhigh` and context tier `default` exactly, including a direct
-`security-reviewer` session. The Codex effort and context values are not
-overridable. If a required Codex model, effort, or context value is
-unavailable, stop rather than silently falling back.
+`/beryllium-security-review` for every engagement. A security review runs
+only on explicit responsible-human request, on the same single project model,
+`claude-opus-5.5`, and is not standard practice (`PMD-20261006-001`); the
+orchestrator never begins an engagement without such a request.
 
-For an explicit non-Codex selection, the project-wide reasoning default is
-`max` and the minimum is `high`; the responsible human may choose only `high`,
-`xhigh`, or `max` for that named invocation. `unset`, `medium`, `low`, and
-`minimal` are prohibited. A non-Codex selection imposes no context tier by
-itself. The selected model, effort, and any explicitly selected context tier
-are exact; if any selected value is unavailable, stop rather than silently
-substituting another model, effort, or context. An explicit later selection of
-`claude-fable-5.1` remains allowed without rewriting historical package names
-or model provenance. The orchestrator:
+The orchestrator, including a direct `security-reviewer` session, and its
+three specialists use model `claude-opus-5.5` with reasoning effort `max` and
+context tier `long_context`. There is no role-specific model, lower effort,
+other context tier, or per-invocation override. If that exact model, effort,
+or context tier is unavailable, stop rather than silently substituting
+another model, effort, or context. Historical package names and model
+provenance remain unchanged except for required publication-safety redaction.
 
+Never write non-public model codenames to repository files, package artifacts,
+generated indexes, commit messages, branch or tag names, release notes, public
+queries, specialist returns, or external publication metadata. When a declared
+runtime model identifier is not publication-safe, `package.model_id` is
+`unlisted` and `/package/model_id` carries a qualification that explains the
+redaction without reproducing the identifier.
+
+The orchestrator:
+
+- reads and SHA-checks the `workspace://SOT.md` startup anchor before any
+  target, sibling, component, or tasking resolution;
 - conducts guided intake, including the session execution set;
 - resolves registered target state through maintained helpers;
 - performs deterministic security-material discovery;
@@ -71,6 +78,23 @@ or model provenance. The orchestrator:
 - invokes maintained lint, validation, and indexing helpers;
 - returns blocking questions and human-gate requirements to the user, ending
   with a `Human review target` section.
+
+At the start of every session, from the registered logical workspace entry,
+and before resolving any target, sibling, or component path or Project
+Manager tasking, the orchestrator reads the current `workspace://SOT.md`
+(`${PWD%/*}/SOT.md`) with the read tool, runs
+`bash ./scripts/readonly-inspect.sh hash-file workspace SOT.md` (which fails
+unless the anchor is a regular, non-symlinked file), and compares the printed
+`sha256` with the `Global startup/status SHA-256` pinned in the current
+generated tasking view
+`workspace://project-manager/outbox/tasking/security-reviewer.md`. An absent,
+unreadable, symlinked, or SHA-drifted anchor, or an unavailable digest, stops
+startup until the Project Manager regenerates its tasking views; no
+remembered, cached, or inferred root, path, or status substitutes. The digest
+read is a startup check, not tasking discovery. The write-disabled
+specialists cannot hash files: each reads the current anchor before resolving
+any path and stops unless the orchestrator supplies the matching
+startup-anchor record.
 
 When the user says `check Project Manager tasking`, or an obvious case,
 singular, or plural variant, the orchestrator runs exactly:
